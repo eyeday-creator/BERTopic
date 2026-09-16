@@ -22,3 +22,22 @@ download.pytorch.org)를 전부 차단하고 있음. `pypi.org`, `github.com` �
 1. claude.ai/code 환경 설정에서 네트워크 정책을 huggingface.co 허용으로 변경 후 재시도
 2. 기존 계산된 임베딩(.npy, 626건, cleaned_text 순서 일치) 업로드받아 진행
 3. GitHub 미러를 통한 모델 파일 확보 시도 (무결성 검증 필요, 성공 불확실)
+
+## 2026-09-16 추가: 파라미터 정정 (논문 본문 대조 결과)
+
+`data/paper.pdf` 연구방법 2절을 직접 대조한 결과, 최초 지시했던 설정 중 아래 3가지가
+실제 논문과 달랐다. 재현 재시도 시 반드시 이 값을 사용할 것:
+
+| 항목 | 잘못 전달된 값 | 논문의 실제 값 |
+|---|---|---|
+| 임베딩 모델 | sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2 | **snunlp/KR-SBERT-V40K-klueNLI-augSTS** |
+| HDBSCAN min_cluster_size | 15 | **20** |
+| CountVectorizer | min_df=5, lowercase=True | 위와 동일 + **ngram_range=(1,2)** |
+
+나머지 설정(UMAP n_neighbors=7/n_components=5/min_dist=0.0/cosine/random_state=42,
+MMR diversity=0.3, top_n_words=10, nr_topics=9, reduce_outliers strategy='distributions',
+Kiwi NNG/NNP 2글자 이상, 불용어 21개)은 원 지시와 논문이 일치함.
+
+새 세션(`session_01JfgwXV3RDAUvXHnMDKK8pA`)은 huggingface.co 접속 테스트 단계에서
+차단되어 멈춘 상태이므로 잘못된 설정으로 계산된 결과는 없음. 재시도 시 위 표의
+정정값을 반영해서 시작할 것.
